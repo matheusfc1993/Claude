@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import authRouter from './routes/auth.js';
 import financialRouter from './routes/financial.js';
+import metricsRouter from './routes/metrics.js';
 import { errorHandler } from './middlewares/error.js';
 import { requestLogger } from './middlewares/logger.js';
 
@@ -22,6 +23,7 @@ app.use(requestLogger);
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/financial', financialRouter);
+app.use('/api/metrics', metricsRouter);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
