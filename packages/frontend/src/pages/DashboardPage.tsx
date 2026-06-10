@@ -5,6 +5,7 @@ import MetricCard from '@/components/dashboard/MetricCard'
 import RevenueChart from '@/components/dashboard/RevenueChart'
 import ExpenseChart from '@/components/dashboard/ExpenseChart'
 import ProfessionalChart from '@/components/dashboard/ProfessionalChart'
+import DailyReport from '@/components/dashboard/DailyReport'
 import { useDashboardMetrics, useMonthlyTrend, useExpenseBreakdown, useProfessionalMetrics } from '@/hooks/useMetrics'
 
 export default function DashboardPage() {
@@ -98,10 +99,11 @@ export default function DashboardPage() {
 
         {/* Professional Metrics */}
         {professionalMetrics.data && professionalMetrics.data.length > 0 && (
-          <div className="lg:col-span-2">
-            <ProfessionalChart data={professionalMetrics.data} />
-          </div>
+          <ProfessionalChart data={professionalMetrics.data} />
         )}
+
+        {/* Daily Report */}
+        <DailyReport />
 
         {!monthlyTrend.data && (
           <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg">

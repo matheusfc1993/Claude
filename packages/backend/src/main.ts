@@ -5,8 +5,11 @@ import { PrismaClient } from '@prisma/client';
 import authRouter from './routes/auth.js';
 import financialRouter from './routes/financial.js';
 import metricsRouter from './routes/metrics.js';
+import aiAssistantRouter from './routes/ai-assistant.js';
+import reportsRouter from './routes/reports.js';
 import { errorHandler } from './middlewares/error.js';
 import { requestLogger } from './middlewares/logger.js';
+import { initializeAllScheduledJobs } from './jobs/daily-report.job.js';
 
 config();
 
@@ -24,6 +27,8 @@ app.use(requestLogger);
 app.use('/api/auth', authRouter);
 app.use('/api/financial', financialRouter);
 app.use('/api/metrics', metricsRouter);
+app.use('/api/ai', aiAssistantRouter);
+app.use('/api/reports', reportsRouter);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
@@ -37,6 +42,9 @@ app.use((req: Request, res: Response) => {
 
 // Error handler
 app.use(errorHandler);
+
+// Initialize scheduled jobs
+initializeAllScheduledJobs();
 
 // Start server
 app.listen(PORT, () => {
