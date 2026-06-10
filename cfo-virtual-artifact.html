@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFO Virtual - Gestão Financeira</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin: 8px 0;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: #3b82f6;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #1e293b;
+        }
+
+        .clinic-info {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .card-change {
+            font-size: 12px;
+            color: #10b981;
+        }
+
+        .card-change.negative {
+            color: #ef4444;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+
+        /* Forms */
+        .form-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group.full {
+            grid-template-columns: 1fr;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Chat */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .message.user .message-content {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input input {
+            flex: 1;
+        }
+
+        .chat-input button {
+            width: auto;
+            min-width: 100px;
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .cards-grid, .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">💰 CFO Virtual</div>
+            <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+            <div class="nav-item" onclick="showSection('financial')">💸 Financeiro</div>
+            <div class="nav-item" onclick="showSection('cfo')">🤖 CFO AI</div>
+            <div class="nav-item" onclick="showSection('reports')">📈 Relatórios</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Dashboard Section -->
+            <div class="section active" id="dashboard">
+                <div class="header">
+                    <h1>Dashboard</h1>
+                    <div class="clinic-info">
+                        <strong>Clínica Exemplo</strong> | João Silva
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-title">📊 Receita Total</div>
+                        <div class="card-value" id="totalRevenue">R$ 15.230,00</div>
+                        <div class="card-change">+12% vs mês anterior</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">💸 Despesas</div>
+                        <div class="card-value" id="totalExpense">R$ 8.950,00</div>
+                        <div class="card-change negative">+5% vs mês anterior</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">💰 Lucro Líquido</div>
+                        <div class="card-value" id="netIncome">R$ 6.280,00</div>
+                        <div class="card-change">+18% vs mês anterior</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📈 Margem de Lucro</div>
+                        <div class="card-value" id="profitMargin">41,2%</div>
+                        <div class="card-change">Excelente performance</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Receita vs Despesas</div>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">Despesas por Categoria</div>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Tendência 12 Meses</div>
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Financial Section -->
+            <div class="section" id="financial">
+                <h1>Gestão Financeira</h1>
+
+                <!-- Add Expense Form -->
+                <div class="form-section">
+                    <h3>Adicionar Despesa Fixa</h3>
+                    <div class="form-group">
+                        <div>
+                            <label>Nome da Despesa</label>
+                            <input type="text" id="expenseName" placeholder="Ex: Aluguel">
+                        </div>
+                        <div>
+                            <label>Categoria</label>
+                            <select id="expenseCategory">
+                                <option>Aluguel</option>
+                                <option>Utilidades</option>
+                                <option>Salários</option>
+                                <option>Suprimentos</option>
+                                <option>Outros</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            <label>Valor (R$)</label>
+                            <input type="number" id="expenseValue" placeholder="0.00" step="0.01">
+                        </div>
+                        <div>
+                            <label>Dia do Vencimento</label>
+                            <input type="number" id="expenseDueDay" min="1" max="31" placeholder="1-31">
+                        </div>
+                    </div>
+                    <button onclick="addExpense()">Adicionar Despesa</button>
+                </div>
+
+                <!-- Add Revenue Form -->
+                <div class="form-section">
+                    <h3>Registrar Receita</h3>
+                    <div class="form-group">
+                        <div>
+                            <label>Data</label>
+                            <input type="date" id="revenueDate">
+                        </div>
+                        <div>
+                            <label>Profissional</label>
+                            <select id="revenueProfessional">
+                                <option>João Silva</option>
+                                <option>Maria Santos</option>
+                                <option>Pedro Oliveira</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            <label>Valor (R$)</label>
+                            <input type="number" id="revenueValue" placeholder="0.00" step="0.01">
+                        </div>
+                        <div>
+                            <label>Tipo de Serviço</label>
+                            <select id="revenueService">
+                                <option>Fisioterapia</option>
+                                <option>Massagem</option>
+                                <option>Acupuntura</option>
+                                <option>Consulta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addRevenue()">Registrar Receita</button>
+                </div>
+
+                <!-- Expenses List -->
+                <div class="form-section">
+                    <h3>Despesas Registradas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesList">
+                            <tr>
+                                <td>Aluguel Sala</td>
+                                <td>Aluguel</td>
+                                <td>R$ 3.000,00</td>
+                                <td>Dia 1</td>
+                            </tr>
+                            <tr>
+                                <td>Internet</td>
+                                <td>Utilidades</td>
+                                <td>R$ 150,00</td>
+                                <td>Dia 10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CFO AI Section -->
+            <div class="section" id="cfo">
+                <h1>🤖 CFO Virtual Assistant</h1>
+                <div class="chat-container">
+                    <div class="messages" id="messages">
+                        <div class="message assistant">
+                            <div class="message-content">Olá! Sou seu CFO Virtual. Como posso ajudá-lo com suas análises financeiras?</div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Faça uma pergunta..." onkeypress="handleChatKeypress(event)">
+                        <button onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="section" id="reports">
+                <h1>Relatório Executivo Diário</h1>
+                <div class="form-section">
+                    <div style="border-left: 4px solid #ef4444; padding-left: 15px;">
+                        <h3 style="margin-bottom: 10px;">⚠️ CRÍTICO</h3>
+                        <p><strong>Diagnóstico:</strong> Despesas crescendo mais rápido que receitas</p>
+                        <p><strong>Impacto:</strong> Margem de lucro pode cair 8% nos próximos 30 dias</p>
+                        <p><strong>Principal Causa:</strong> Aumento de gastos com suprimentos (+23%)</p>
+                        <p><strong>Recomendação Prioritária:</strong> Renegociar contrato de fornecedores ou reduzir uso em 15%</p>
+                        <p style="margin-top: 10px; color: #666;"><small>Relatório gerado automaticamente às 20:00 de hoje</small></p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Histórico de Relatórios</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Diagnóstico</th>
+                                <th>Nível</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hoje</td>
+                                <td>Despesas crescendo</td>
+                                <td><span style="color: #ef4444;">🔴 CRÍTICO</span></td>
+                            </tr>
+                            <tr>
+                                <td>Ontem</td>
+                                <td>Crescimento saudável</td>
+                                <td><span style="color: #10b981;">🟢 BOM</span></td>
+                            </tr>
+                            <tr>
+                                <td>2 dias atrás</td>
+                                <td>Atenção ao fluxo de caixa</td>
+                                <td><span style="color: #f59e0b;">🟡 MÉDIO</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date
+        document.getElementById('revenueDate').valueAsDate = new Date();
+
+        // Show/Hide Sections
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (sectionId === 'dashboard') {
+                setTimeout(() => {
+                    initCharts();
+                }, 100);
+            }
+        }
+
+        // Add Expense
+        function addExpense() {
+            const name = document.getElementById('expenseName').value;
+            const category = document.getElementById('expenseCategory').value;
+            const value = document.getElementById('expenseValue').value;
+            const dueDay = document.getElementById('expenseDueDay').value;
+
+            if (name && value && dueDay) {
+                const table = document.getElementById('expensesList');
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${name}</td>
+                    <td>${category}</td>
+                    <td>R$ ${parseFloat(value).toFixed(2).replace('.', ',')}</td>
+                    <td>Dia ${dueDay}</td>
+                `;
+
+                // Clear form
+                document.getElementById('expenseName').value = '';
+                document.getElementById('expenseValue').value = '';
+                document.getElementById('expenseDueDay').value = '';
+
+                alert('✅ Despesa adicionada com sucesso!');
+                updateMetrics();
+            } else {
+                alert('❌ Preencha todos os campos!');
+            }
+        }
+
+        // Add Revenue
+        function addRevenue() {
+            const date = document.getElementById('revenueDate').value;
+            const professional = document.getElementById('revenueProfessional').value;
+            const value = document.getElementById('revenueValue').value;
+            const service = document.getElementById('revenueService').value;
+
+            if (date && professional && value && service) {
+                alert('✅ Receita registrada com sucesso!');
+                document.getElementById('revenueValue').value = '';
+                updateMetrics();
+            } else {
+                alert('❌ Preencha todos os campos!');
+            }
+        }
+
+        // Update Metrics
+        function updateMetrics() {
+            // Simulated calculation
+            const revenue = 15230 + Math.random() * 2000;
+            const expense = 8950 + Math.random() * 1000;
+            const income = revenue - expense;
+            const margin = (income / revenue * 100).toFixed(1);
+
+            document.getElementById('totalRevenue').textContent = 'R$ ' + revenue.toFixed(2).replace('.', ',');
+            document.getElementById('totalExpense').textContent = 'R$ ' + expense.toFixed(2).replace('.', ',');
+            document.getElementById('netIncome').textContent = 'R$ ' + income.toFixed(2).replace('.', ',');
+            document.getElementById('profitMargin').textContent = margin + '%';
+        }
+
+        // Chat Functions
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (message) {
+                const messagesDiv = document.getElementById('messages');
+
+                // Add user message
+                const userMsg = document.createElement('div');
+                userMsg.className = 'message user';
+                userMsg.innerHTML = `<div class="message-content">${message}</div>`;
+                messagesDiv.appendChild(userMsg);
+
+                input.value = '';
+
+                // Simulate AI response
+                setTimeout(() => {
+                    const responses = [
+                        'Sua margem de lucro está em 41,2%, o que é excelente! Continue assim.',
+                        'Recomendo renegociar contratos de fornecedores para reduzir despesas.',
+                        'O crescimento de receita está 12% acima do mês anterior. Muito bom!',
+                        'Você deve focar em reduzir despesas com suprimentos, que cresceram 23%.',
+                        'Seu fluxo de caixa está saudável. Continue monitorando as tendências.'
+                    ];
+
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    const assistantMsg = document.createElement('div');
+                    assistantMsg.className = 'message assistant';
+                    assistantMsg.innerHTML = `<div class="message-content">${response}</div>`;
+                    messagesDiv.appendChild(assistantMsg);
+
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }, 500);
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx && !revenueCtx.dataset.initialized) {
+                new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                        datasets: [
+                            {
+                                label: 'Receita',
+                                data: [3800, 4200, 3900, 4330],
+                                backgroundColor: '#3b82f6'
+                            },
+                            {
+                                label: 'Despesas',
+                                data: [2100, 2300, 2200, 2350],
+                                backgroundColor: '#ef4444'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+                revenueCtx.dataset.initialized = true;
+            }
+
+            // Expense Chart
+            const expenseCtx = document.getElementById('expenseChart');
+            if (expenseCtx && !expenseCtx.dataset.initialized) {
+                new Chart(expenseCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Aluguel', 'Salários', 'Utilidades', 'Suprimentos'],
+                        datasets: [{
+                            data: [3000, 3500, 800, 1650],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+                expenseCtx.dataset.initialized = true;
+            }
+
+            // Trend Chart
+            const trendCtx = document.getElementById('trendChart');
+            if (trendCtx && !trendCtx.dataset.initialized) {
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [{
+                            label: 'Receita',
+                            data: [12000, 13200, 13800, 14200, 14800, 15000, 15230, 15500, 15800, 16000, 16200, 16500],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+                trendCtx.dataset.initialized = true;
+            }
+        }
+
+        // Initialize charts on load
+        setTimeout(initCharts, 500);
+    </script>
+</body>
+</html>
