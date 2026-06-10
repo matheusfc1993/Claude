@@ -1,0 +1,290 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  ACCOUNTANT
+  MANAGER
+  STAFF
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// Models
+model Clinic {
+  id        String   @id @default(cuid())
+  name      String
+  cnpj      String   @unique
+  address   String?
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                User[]
+  professionals        Professional[]
+  fixedExpenses        FixedExpense[]
+  variableExpenses     VariableExpense[]
+  revenues             Revenue[]
+  services             Service[]
+  packages             ServicePackage[]
+  goals                Goal[]
+  taxConfigurations    TaxConfiguration[]
+  aiContexts           AIContext[]
+  aiConversations      AIConversation[]
+  executiveReports     ExecutiveReport[]
+  googleSheetsSync     GoogleSheetsSync[]
+  auditLogs            AuditLog[]
+
+  @@index([cnpj])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+
+  aiConversations AIConversation[]
+  auditLogs       AuditLog[]
+
+  @@index([clinicId])
+  @@index([email])
+}
+
+model Professional {
+  id                    String   @id @default(cuid())
+  clinicId              String
+  clinic                Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name                  String
+  specialty             String
+  cpf                   String
+  salary                Decimal  @db.Decimal(12, 2)
+  commissionsPercentage Decimal  @default(0) @db.Decimal(5, 2)
+  prorLaborePercentage  Decimal  @default(0) @db.Decimal(5, 2)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  revenues Revenue[]
+
+  @@index([clinicId])
+}
+
+model FixedExpense {
+  id        String   @id @default(cuid())
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name      String
+  category  String
+  amount    Decimal  @db.Decimal(12, 2)
+  dueDay    Int      @db.SmallInt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model VariableExpense {
+  id          String   @id @default(cuid())
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  category    String
+  description String?
+  amount      Decimal  @db.Decimal(12, 2)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([date])
+}
+
+model Revenue {
+  id             String   @id @default(cuid())
+  clinicId       String
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  date           DateTime @db.Date
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  serviceId      String?
+  service        Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  amount         Decimal  @db.Decimal(12, 2)
+  patientName    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([date])
+}
+
+model Service {
+  id               String   @id @default(cuid())
+  clinicId         String
+  clinic           Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name             String
+  description      String?
+  defaultPrice     Decimal  @db.Decimal(12, 2)
+  estimatedMinutes Int
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  revenues Revenue[]
+
+  @@index([clinicId])
+}
+
+model ServicePackage {
+  id                   String   @id @default(cuid())
+  clinicId             String
+  clinic               Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name                 String
+  description          String?
+  sessionsIncluded     Int
+  totalPrice           Decimal  @db.Decimal(12, 2)
+  discountPercentage   Decimal  @db.Decimal(5, 2)
+  validityDays         Int
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model TaxConfiguration {
+  id             String   @id @default(cuid())
+  clinicId       String
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  taxType        String
+  percentage     Decimal  @db.Decimal(5, 2)
+  appliesTo      String
+  effectiveDate  DateTime @db.Date
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model Goal {
+  id              String   @id @default(cuid())
+  clinicId        String
+  clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name            String
+  targetAmount    Decimal  @db.Decimal(12, 2)
+  targetDate      DateTime @db.Date
+  category        String
+  currentProgress Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model AIContext {
+  id           String   @id @default(cuid())
+  clinicId     String
+  clinic       Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  contextType  String
+  content      String   @db.Text
+  importance   Int      @default(3) @db.SmallInt
+  lastUpdated  DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  @@index([clinicId])
+  @@index([contextType])
+}
+
+model AIConversation {
+  id          String   @id @default(cuid())
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageType String
+  content     String   @db.Text
+  tokens      Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([clinicId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ExecutiveReport {
+  id                      String   @id @default(cuid())
+  clinicId                String
+  clinic                  Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  reportDate              DateTime @db.Date
+  diagnosis               String   @db.Text
+  financialImpact         String   @db.Text
+  mainCause               String
+  priorityRecommendation  String   @db.Text
+  urgencyLevel            UrgencyLevel
+  metrics                 String   @db.Text
+  createdAt               DateTime @default(now())
+
+  @@index([clinicId])
+  @@index([reportDate])
+}
+
+model GoogleSheetsSync {
+  id             String   @id @default(cuid())
+  clinicId       String
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  spreadsheetId  String
+  sheetName      String
+  syncType       String
+  lastSyncedAt   DateTime?
+  status         SyncStatus @default(PENDING)
+  errorMessage   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action     String
+  entityType String
+  entityId   String
+  changes    String   @db.Text
+  timestamp  DateTime @default(now())
+
+  @@index([clinicId])
+  @@index([userId])
+  @@index([timestamp])
+}
