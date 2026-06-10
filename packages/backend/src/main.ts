@@ -7,6 +7,7 @@ import financialRouter from './routes/financial.js';
 import metricsRouter from './routes/metrics.js';
 import aiAssistantRouter from './routes/ai-assistant.js';
 import reportsRouter from './routes/reports.js';
+import googleSheetsRouter from './routes/google-sheets.js';
 import { errorHandler } from './middlewares/error.js';
 import { requestLogger } from './middlewares/logger.js';
 import { initializeAllScheduledJobs } from './jobs/daily-report.job.js';
@@ -29,6 +30,7 @@ app.use('/api/financial', financialRouter);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/ai', aiAssistantRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/google-sheets', googleSheetsRouter);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
