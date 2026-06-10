@@ -1,0 +1,36 @@
+{
+  "theme": "dark",
+  "model": "claude-opus",
+  "terminalShell": "bash",
+  "allowedPermissions": {
+    "bash": [
+      "run npm commands",
+      "start development servers",
+      "run database migrations",
+      "manage docker containers"
+    ],
+    "fileAccess": [
+      "read configuration files",
+      "write to .env files",
+      "access source code"
+    ]
+  },
+  "excludeFiles": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".git/",
+    "postgres_data/",
+    ".DS_Store"
+  ],
+  "developmentSetup": {
+    "databases": ["PostgreSQL", "Redis"],
+    "servers": ["Backend (Express)", "Frontend (Vite)"],
+    "ports": {
+      "backend": 3000,
+      "frontend": 5173,
+      "postgres": 5432,
+      "redis": 6379
+    }
+  }
+}
