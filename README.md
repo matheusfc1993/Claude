@@ -125,3 +125,12 @@ Core endpoints:
 ## License
 
 Proprietary - All rights reserved
+
+## 🚖 Táxi PoA 2000 — Jogo 3D
+
+Jogo de corridas de táxi em 3D pelo Centro Histórico de Porto Alegre (anos 2000), com pôr do sol no Guaíba.
+
+- **Arquivo:** [`taxi-poa.html`](taxi-poa.html) — basta abrir no navegador (requer internet para carregar o Three.js via CDN)
+- **Câmeras:** 1ª e 3ª pessoa (tecla `C`)
+- **Controles:** `W/A/S/D` ou setas para dirigir, `ESPAÇO` freio de mão, `M` som, `R` endireitar (suporte a toque no celular)
+- **Objetivo:** pegar passageiros e levá-los aos destinos (Mercado Público, Gasômetro, Catedral, Esquina Democrática...) antes do tempo acabar — cada corrida paga em R$ e adiciona tempo
