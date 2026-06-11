@@ -32,5 +32,14 @@
       "postgres": 5432,
       "redis": 6379
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "python3 calculate_hour_value.py",
+        "statusMessage": "Verificando dados econômicos..."
+      }
+    ]
   }
 }
