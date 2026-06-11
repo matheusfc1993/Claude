@@ -1,0 +1,41 @@
+{
+  "baseline": {
+    "data": "2018-08",
+    "valor_hora_base": 50.00,
+    "moeda": "BRL",
+    "descricao": "Base de cálculo: Agosto de 2018"
+  },
+  "indices_economicos": [
+    {
+      "data": "2026-06-11",
+      "ipca_12m": 4.39,
+      "ipca_ytd": 2.60,
+      "ipca_acumulado_ago2018": 47.5,
+      "inpc_acumulado_ago2018": 42.8,
+      "selic": 14.50,
+      "salario_medio_br": 3722.00,
+      "salario_2018_base": 2300,
+      "salario_porto_alegre": 3850,
+      "fonte": "IBGE, BCB, dados de mercado, Dieese, Glassdoor",
+      "notas": "Primeira coleta completa. IPCA/INPC estimados por série histórica. Salário Porto Alegre estimado 3% acima média nacional."
+    }
+  ],
+  "calculos_valor_hora": [
+    {
+      "data": "2026-06-11",
+      "metodo_ipca": 73.75,
+      "metodo_inpc": 71.40,
+      "metodo_salario_nacional": 80.90,
+      "metodo_porto_alegre": 79.60,
+      "premium_recomendado": 78.00,
+      "notas": "Premium calculado como média + 15% valorização profissional. Selic elevada (14.5%) reduz demanda - manter premium conservador."
+    }
+  ],
+  "tendencias": {
+    "inflacao": "IPCA 12m: 4.39% - Sob controle relativo. IPCA YTD 2.60%",
+    "taxa_juros": "Selic em 14.50% - Nível elevado, impacta demanda",
+    "mercado_fisioterapia": "Faixa de R$ 80-250/sessão. Especialistas cobram 30-50% premium. CV = R$ 0,85 em 2026",
+    "renda_media": "Salário médio brasileiro R$ 3.722 (Q1/2026) - Recorde histórico",
+    "proxima_revisao": "2026-06-18"
+  }
+}
