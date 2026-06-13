@@ -5,6 +5,8 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import FinancialPage from './pages/FinancialPage'
 import CFOAssistantPage from './pages/CFOAssistantPage'
+import { PoliticalGamePage } from './pages/PoliticalGamePage'
+import { GameSetupPage } from './pages/GameSetupPage'
 import PrivateRoute from './components/common/PrivateRoute'
 
 const queryClient = new QueryClient()
@@ -21,6 +23,8 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/financial" element={<FinancialPage />} />
             <Route path="/cfo-assistant" element={<CFOAssistantPage />} />
+            <Route path="/games/political/setup" element={<GameSetupPage />} />
+            <Route path="/games/political/:gameId" element={<PoliticalGamePage />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
