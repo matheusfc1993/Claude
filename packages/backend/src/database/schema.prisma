@@ -31,6 +31,21 @@ enum SyncStatus {
   FAILED
 }
 
+// Political Game Enums
+enum PoliticalPosition {
+  VEREADOR
+  DEPUTADO_ESTADUAL
+  DEPUTADO_FEDERAL
+  SENADOR
+  PRESIDENTE
+}
+
+enum GameStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
 // Models
 model Clinic {
   id        String   @id @default(cuid())
@@ -74,6 +89,7 @@ model User {
 
   aiConversations AIConversation[]
   auditLogs       AuditLog[]
+  politicalGames  PoliticalGame[]
 
   @@index([clinicId])
   @@index([email])
@@ -287,4 +303,67 @@ model AuditLog {
   @@index([clinicId])
   @@index([userId])
   @@index([timestamp])
+}
+
+// Political Game Models
+model PoliticalGame {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  currentTurn Int @default(1)
+  currentPosition PoliticalPosition @default(VEREADOR)
+  status GameStatus @default(ACTIVE)
+
+  reputation Int @default(50)
+  campaignFunds Decimal @default(10000) @db.Decimal(12, 2)
+  ideology Json
+  allies Json
+  decisionHistory Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  turns GameTurn[]
+  decisions GameDecision[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model GameTurn {
+  id String @id @default(cuid())
+  gameId String
+  game PoliticalGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  turnNumber Int
+  situation String @db.Text
+  choices Json
+
+  chosenIndex Int?
+  consequence String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@unique([gameId, turnNumber])
+  @@index([gameId])
+}
+
+model GameDecision {
+  id String @id @default(cuid())
+  gameId String
+  game PoliticalGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  turnNumber Int
+  chosenText String
+  tokensUsed Int @default(0)
+
+  reputationChange Int @default(0)
+  fundsChange Decimal @default(0) @db.Decimal(12, 2)
+  ideologyShift Json
+  newAllies String[]
+
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
 }
