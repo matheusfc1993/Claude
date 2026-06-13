@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Jogo de Política - Acesso Rápido</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .instructions {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .instructions h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .instructions ol {
+            list-style-position: inside;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        .status.error .dot {
+            background: #f44336;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .divider {
+            height: 1px;
+            background: #eee;
+            margin: 20px 0;
+        }
+
+        .footer {
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature {
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .feature strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎮</div>
+        <h1>Jogo de Política</h1>
+        <p class="subtitle">Turnos Infinitos com IA</p>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="abrirJogo()">
+                ▶️ ABRIR JOGO AGORA
+            </button>
+            <button class="btn btn-secondary" onclick="copiarURL()">
+                📋 Copiar Link
+            </button>
+        </div>
+
+        <div id="status" class="status" style="display:none;">
+            <div class="dot"></div>
+            <span id="statusText">Verificando servidores...</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="feature-list">
+            <div class="feature">
+                <strong>♾️ Turnos Infinitos</strong>
+                Jogue o quanto quiser
+            </div>
+            <div class="feature">
+                <strong>🤖 IA Dinâmica</strong>
+                Situações sempre novas
+            </div>
+            <div class="feature">
+                <strong>📊 Métricas</strong>
+                Acompanhe seu progresso
+            </div>
+            <div class="feature">
+                <strong>💾 Salva Automático</strong>
+                No seu navegador
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Como Jogar:</h2>
+            <ol>
+                <li><strong>Clique em "ABRIR JOGO AGORA"</strong> acima</li>
+                <li><strong>Registre-se</strong> com email e senha</li>
+                <li><strong>Vá para Jogo de Política</strong> no menu</li>
+                <li><strong>Escolha sua posição inicial</strong> (Vereador até Senador)</li>
+                <li><strong>Comece a jogar!</strong> 🚀</li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            <p>🔗 Frontend: localhost:5173 | 🔧 Backend: localhost:3000</p>
+            <p>Desenvolvido com React + Express + Fable 5</p>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se os servidores estão rodando
+        function verificarServidor() {
+            const statusEl = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+
+            fetch('http://localhost:5173', { method: 'HEAD' })
+                .then(() => {
+                    statusEl.style.display = 'flex';
+                    statusText.textContent = '✅ Servidor pronto! Clique em ABRIR JOGO AGORA';
+                })
+                .catch(() => {
+                    statusEl.classList.add('error');
+                    statusEl.style.display = 'flex';
+                    statusText.textContent = '⚠️ Servidor não está rodando. Verifique o terminal.';
+                });
+        }
+
+        // Abrir o jogo
+        function abrirJogo() {
+            window.location.href = 'http://localhost:5173/games/political/setup';
+        }
+
+        // Copiar URL para clipboard
+        function copiarURL() {
+            const url = 'http://localhost:5173/games/political/setup';
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ Link copiado para clipboard!\n\n' + url);
+            }).catch(() => {
+                alert('Link do jogo:\nlocalhost:5173/games/political/setup');
+            });
+        }
+
+        // Verificar ao carregar
+        window.addEventListener('load', verificarServidor);
+    </script>
+</body>
+</html>
