@@ -6,13 +6,13 @@ import {
   listPlayerGames,
   getTurnHistory,
 } from '../controllers/political-game.js'
-import { authenticate } from '../middlewares/auth.js'
+import { authMiddleware } from '../middlewares/auth.js'
 import { asyncHandler } from '../utils/async-handler.js'
 
 const router = Router()
 
 // All routes require authentication
-router.use(authenticate)
+router.use(authMiddleware)
 
 // Game management
 router.post('/start', asyncHandler(startGame))

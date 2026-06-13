@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const fixedExpenseSchema = z.object({
   name: z.string().min(1),
   category: z.string().min(1),
-  amount: z.string().or(z.number()).pipe(z.coerce.decimal()),
+  amount: z.string().or(z.number()).pipe(z.coerce.number()),
   dueDay: z.number().int().min(1).max(31),
 });
 
@@ -17,7 +17,7 @@ const variableExpenseSchema = z.object({
   date: z.string().or(z.date()),
   category: z.string().min(1),
   description: z.string().optional(),
-  amount: z.string().or(z.number()).pipe(z.coerce.decimal()),
+  amount: z.string().or(z.number()).pipe(z.coerce.number()),
   notes: z.string().optional(),
 });
 
@@ -25,7 +25,7 @@ const revenueSchema = z.object({
   date: z.string().or(z.date()),
   professionalId: z.string(),
   serviceId: z.string().optional(),
-  amount: z.string().or(z.number()).pipe(z.coerce.decimal()),
+  amount: z.string().or(z.number()).pipe(z.coerce.number()),
   patientName: z.string().optional(),
 });
 
@@ -33,7 +33,7 @@ const professionalSchema = z.object({
   name: z.string().min(1),
   specialty: z.string().min(1),
   cpf: z.string().regex(/^\d{11}$/),
-  salary: z.string().or(z.number()).pipe(z.coerce.decimal()),
+  salary: z.string().or(z.number()).pipe(z.coerce.number()),
   commissionsPercentage: z.number().default(0),
   prorLaborePercentage: z.number().default(0),
 });
