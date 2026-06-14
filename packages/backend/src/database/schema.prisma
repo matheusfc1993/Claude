@@ -31,6 +31,19 @@ enum SyncStatus {
   FAILED
 }
 
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum SyncAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 // Models
 model Clinic {
   id        String   @id @default(cuid())
@@ -44,6 +57,7 @@ model Clinic {
 
   users                User[]
   professionals        Professional[]
+  patients             Patient[]
   fixedExpenses        FixedExpense[]
   variableExpenses     VariableExpense[]
   revenues             Revenue[]
@@ -56,6 +70,9 @@ model Clinic {
   executiveReports     ExecutiveReport[]
   googleSheetsSync     GoogleSheetsSync[]
   auditLogs            AuditLog[]
+  timeBlocks           TimeBlock[]
+  appointments         Appointment[]
+  syncQueue            SyncQueue[]
 
   @@index([cnpj])
 }
@@ -93,7 +110,9 @@ model Professional {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  revenues Revenue[]
+  revenues      Revenue[]
+  timeBlocks    TimeBlock[]
+  appointments  Appointment[]
 
   @@index([clinicId])
 }
@@ -136,15 +155,20 @@ model Revenue {
   date           DateTime @db.Date
   professionalId String
   professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  patientId      String?
+  patient        Patient?  @relation(fields: [patientId], references: [id], onDelete: SetNull)
   serviceId      String?
   service        Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   amount         Decimal  @db.Decimal(12, 2)
-  patientName    String?
+  patientName    String?  @deprecated("Use patientId instead")
+  appointmentId  String?
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([clinicId])
   @@index([date])
+  @@index([patientId])
 }
 
 model Service {
@@ -159,7 +183,8 @@ model Service {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  revenues Revenue[]
+  revenues      Revenue[]
+  appointments  Appointment[]
 
   @@index([clinicId])
 }
@@ -270,6 +295,95 @@ model GoogleSheetsSync {
   updatedAt      DateTime @updatedAt
 
   @@index([clinicId])
+}
+
+model Patient {
+  id        String   @id @default(cuid())
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  birthDate DateTime? @db.Date
+  document  String?
+  address   String?
+  notes     String?   @db.Text
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  revenues     Revenue[]
+  appointments Appointment[]
+
+  @@index([clinicId])
+  @@index([email])
+  @@index([document])
+}
+
+model TimeBlock {
+  id             String   @id @default(cuid())
+  clinicId       String
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  date           DateTime @db.Date
+  startTime      String   // Format: "HH:mm" (e.g., "07:10")
+  endTime        String   // Format: "HH:mm" (e.g., "08:00")
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  isAvailable    Boolean  @default(true)
+  appointmentId  String?
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([date])
+  @@index([professionalId])
+  @@unique([date, startTime, professionalId])
+}
+
+model Appointment {
+  id             String   @id @default(cuid())
+  clinicId       String
+  clinic         Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patientId      String
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  serviceId      String?
+  service        Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  timeBlockId    String?
+  timeBlock      TimeBlock? @relation(fields: [timeBlockId], references: [id], onDelete: SetNull)
+  date           DateTime @db.Date
+  status         AppointmentStatus @default(SCHEDULED)
+  notes          String?  @db.Text
+  amount         Decimal? @db.Decimal(12, 2)
+  revenues       Revenue[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([patientId])
+  @@index([date])
+  @@index([status])
+}
+
+model SyncQueue {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  entityType String   // e.g., "REVENUE", "APPOINTMENT", "PATIENT"
+  entityId   String?  // The ID of the entity being synced
+  action     SyncAction
+  data       String   @db.Json // JSON serialized data
+  status     SyncStatus @default(PENDING)
+  error      String?  @db.Text
+  createdAt  DateTime @default(now())
+  syncedAt   DateTime?
+  retries    Int      @default(0)
+
+  @@index([clinicId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model AuditLog {
