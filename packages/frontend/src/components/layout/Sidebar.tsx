@@ -6,9 +6,11 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Financial', path: '/financial' },
-  { label: 'CFO Assistant', path: '/cfo-assistant' },
+  { label: '📊 Dashboard', path: '/dashboard' },
+  { label: '💰 Financeiro', path: '/financial' },
+  { label: '👥 Pacientes', path: '/patients' },
+  { label: '📅 Agendamentos', path: '/schedule' },
+  { label: '🤖 CFO Assistant', path: '/cfo-assistant' },
 ]
 
 export default function Sidebar({ open, onClose }: SidebarProps) {

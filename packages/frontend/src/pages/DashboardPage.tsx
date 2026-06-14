@@ -6,6 +6,7 @@ import RevenueChart from '@/components/dashboard/RevenueChart'
 import ExpenseChart from '@/components/dashboard/ExpenseChart'
 import ProfessionalChart from '@/components/dashboard/ProfessionalChart'
 import DailyReport from '@/components/dashboard/DailyReport'
+import PatientDashboardCard from '@/components/dashboard/PatientDashboardCard'
 import { useDashboardMetrics, useMonthlyTrend, useExpenseBreakdown, useProfessionalMetrics } from '@/hooks/useMetrics'
 
 export default function DashboardPage() {
@@ -104,6 +105,11 @@ export default function DashboardPage() {
 
         {/* Daily Report */}
         <DailyReport />
+
+        {/* Patient Analytics Section */}
+        <div className="border-t-2 border-gray-300 pt-8 mt-8">
+          <PatientDashboardCard />
+        </div>
 
         {!monthlyTrend.data && (
           <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg">
