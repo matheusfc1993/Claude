@@ -1,0 +1,10 @@
+{
+  "pkg": {
+    "targets": ["win-x64"],
+    "outputPath": "../../dist",
+    "scripts": ["./dist/**/*.js"],
+    "assets": [
+      ".env.example"
+    ]
+  }
+}
