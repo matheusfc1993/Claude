@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EdgeBrain Memory Schema",
+  "description": "Schema for all memory layers in Edge Brain",
+  "definitions": {
+
+    "MemoryEntry": {
+      "type": "object",
+      "required": ["id","layer","content","created_at"],
+      "properties": {
+        "id":          { "type": "string", "description": "UUID v4" },
+        "layer": {
+          "type": "string",
+          "enum": ["working","semantic","episodic","tool","procedural"],
+          "description": "working=session; semantic=facts; episodic=events; tool=capability; procedural=how-to"
+        },
+        "content":     { "type": "string", "description": "The stored knowledge" },
+        "embedding":   { "type": "array", "items": { "type": "number" }, "description": "Optional local embedding vector" },
+        "tags":        { "type": "array", "items": { "type": "string" } },
+        "source":      { "type": "string", "description": "tool_call | user | inference | import" },
+        "confidence":  { "type": "number", "minimum": 0, "maximum": 1, "default": 1.0 },
+        "created_at":  { "type": "string", "format": "date-time" },
+        "last_accessed": { "type": "string", "format": "date-time" },
+        "access_count": { "type": "integer", "minimum": 0, "default": 0 },
+        "ttl_seconds": {
+          "type": ["integer","null"],
+          "description": "null = permanent; working layer default = 3600"
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["target_id","relation_type"],
+            "properties": {
+              "target_id":     { "type": "string" },
+              "relation_type": { "type": "string", "enum": ["supports","contradicts","refines","uses","produces"] }
+            }
+          }
+        }
+      }
+    },
+
+    "MemoryIndex": {
+      "type": "object",
+      "required": ["version","entries","stats"],
+      "properties": {
+        "version":   { "type": "string" },
+        "entries":   { "type": "array", "items": { "$ref": "#/definitions/MemoryEntry" } },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "total_entries":   { "type": "integer" },
+            "by_layer":        { "type": "object" },
+            "last_compacted":  { "type": "string", "format": "date-time" }
+          }
+        }
+      }
+    },
+
+    "MemoryQuery": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query":       { "type": "string" },
+        "layers":      { "type": "array", "items": { "type": "string" } },
+        "top_k":       { "type": "integer", "minimum": 1, "maximum": 20, "default": 5 },
+        "min_confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.5 },
+        "tags_filter": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "MemoryWriteRequest": {
+      "type": "object",
+      "required": ["layer","content"],
+      "properties": {
+        "layer":      { "type": "string" },
+        "content":    { "type": "string" },
+        "tags":       { "type": "array", "items": { "type": "string" } },
+        "ttl_seconds": { "type": ["integer","null"] },
+        "source":     { "type": "string" },
+        "confidence": { "type": "number" }
+      }
+    }
+  },
+
+  "type": "object",
+  "description": "Root memory store",
+  "$ref": "#/definitions/MemoryIndex"
+}

@@ -1,0 +1,253 @@
+{
+  "schema_version": "1.0.0",
+  "tools": [
+
+    {
+      "id": "calc",
+      "name": "Calculator",
+      "version": "1.0.0",
+      "category": "compute",
+      "description": "Evaluates mathematical expressions. Supports arithmetic, trigonometry, logarithms, unit conversion. Runs off-LLM via safe eval.",
+      "cost_tier": "free",
+      "executor": "local_python",
+      "timeout_ms": 200,
+      "parameters": [
+        { "name": "expression", "type": "string", "description": "Math expression to evaluate. Use Python syntax.", "required": true },
+        { "name": "precision",  "type": "number", "description": "Decimal places in result", "required": false, "default": 6 }
+      ],
+      "output": {
+        "type": "number",
+        "description": "Numeric result of the expression"
+      },
+      "examples": [
+        { "input": { "expression": "2 ** 10" }, "output": 1024 },
+        { "input": { "expression": "math.sin(math.pi / 2)" }, "output": 1.0 }
+      ],
+      "tags": ["math", "arithmetic", "compute"]
+    },
+
+    {
+      "id": "datetime",
+      "name": "DateTime",
+      "version": "1.0.0",
+      "category": "time",
+      "description": "Handles date/time parsing, arithmetic, formatting and timezone conversion. Always accurate — never guess dates.",
+      "cost_tier": "free",
+      "executor": "local_python",
+      "timeout_ms": 100,
+      "parameters": [
+        { "name": "op",       "type": "string", "description": "Operation: now | parse | add | diff | format | tz_convert", "required": true,
+          "enum": ["now","parse","add","diff","format","tz_convert"] },
+        { "name": "input",    "type": "string", "description": "Date string or ISO datetime", "required": false },
+        { "name": "delta",    "type": "object", "description": "Timedelta spec: {days,hours,minutes,seconds}", "required": false },
+        { "name": "format",   "type": "string", "description": "strftime format string", "required": false },
+        { "name": "from_tz",  "type": "string", "description": "Source timezone (IANA name)", "required": false },
+        { "name": "to_tz",    "type": "string", "description": "Target timezone (IANA name)", "required": false }
+      ],
+      "output": {
+        "type": "string",
+        "description": "Resulting datetime string or numeric diff in seconds"
+      },
+      "examples": [
+        { "input": { "op": "now" }, "output": "2026-06-25T10:00:00+00:00" },
+        { "input": { "op": "add", "input": "2026-06-25", "delta": { "days": 30 } }, "output": "2026-07-25" }
+      ],
+      "tags": ["time", "date", "timezone"]
+    },
+
+    {
+      "id": "memory_search",
+      "name": "Memory Search",
+      "version": "1.0.0",
+      "category": "memory",
+      "description": "Searches all memory layers using keyword + optional embedding similarity. Returns ranked results.",
+      "cost_tier": "low",
+      "executor": "local_python",
+      "timeout_ms": 300,
+      "parameters": [
+        { "name": "query",        "type": "string",  "description": "Natural language or keyword query", "required": true },
+        { "name": "layers",       "type": "array",   "description": "Memory layers to search (default: all)", "required": false },
+        { "name": "top_k",        "type": "number",  "description": "Max results to return", "required": false, "default": 5 },
+        { "name": "min_confidence", "type": "number","description": "Minimum confidence threshold", "required": false, "default": 0.5 }
+      ],
+      "output": {
+        "type": "array",
+        "description": "List of matching MemoryEntry objects sorted by relevance"
+      },
+      "tags": ["memory", "search", "recall"]
+    },
+
+    {
+      "id": "memory_write",
+      "name": "Memory Write",
+      "version": "1.0.0",
+      "category": "memory",
+      "description": "Persists a fact, preference, or tool output to the appropriate memory layer.",
+      "cost_tier": "low",
+      "executor": "local_python",
+      "timeout_ms": 200,
+      "parameters": [
+        { "name": "layer",       "type": "string", "description": "Target layer: working|semantic|episodic|tool|procedural", "required": true },
+        { "name": "content",     "type": "string", "description": "The content to store", "required": true },
+        { "name": "tags",        "type": "array",  "description": "Classification tags", "required": false },
+        { "name": "ttl_seconds", "type": "number", "description": "Time-to-live in seconds; null = permanent", "required": false },
+        { "name": "confidence",  "type": "number", "description": "Confidence score 0–1", "required": false, "default": 1.0 }
+      ],
+      "output": {
+        "type": "string",
+        "description": "ID of the created memory entry"
+      },
+      "tags": ["memory", "write", "persist"]
+    },
+
+    {
+      "id": "file_read",
+      "name": "File Read",
+      "version": "1.0.0",
+      "category": "io",
+      "description": "Reads file content from the local workspace. Supports text, JSON, CSV, YAML. Returns parsed structure when format is detected.",
+      "cost_tier": "low",
+      "executor": "local_python",
+      "timeout_ms": 1000,
+      "parameters": [
+        { "name": "path",     "type": "string", "description": "Relative path within workspace", "required": true },
+        { "name": "encoding", "type": "string", "description": "File encoding", "required": false, "default": "utf-8" },
+        { "name": "lines",    "type": "array",  "description": "[start, end] line range (1-indexed)", "required": false },
+        { "name": "parse",    "type": "boolean","description": "Auto-parse JSON/CSV/YAML", "required": false, "default": true }
+      ],
+      "output": {
+        "type": "object",
+        "description": "{ content: string|object, size_bytes: number, format: string }"
+      },
+      "tags": ["io", "file", "read"]
+    },
+
+    {
+      "id": "text_transform",
+      "name": "Text Transform",
+      "version": "1.0.0",
+      "category": "text",
+      "description": "Performs deterministic text operations: regex extract/replace, split, join, count tokens, truncate, hash. Zero LLM cost.",
+      "cost_tier": "free",
+      "executor": "local_python",
+      "timeout_ms": 150,
+      "parameters": [
+        { "name": "op",     "type": "string",  "description": "Operation: regex_extract | regex_replace | split | join | token_count | truncate | hash | base64_encode | base64_decode", "required": true },
+        { "name": "input",  "type": "string",  "description": "Input text", "required": true },
+        { "name": "pattern","type": "string",  "description": "Regex pattern (for regex ops)", "required": false },
+        { "name": "replacement","type": "string","description": "Replacement string", "required": false },
+        { "name": "delimiter","type": "string","description": "Delimiter for split/join", "required": false },
+        { "name": "max_tokens","type": "number","description": "Max tokens for truncate", "required": false },
+        { "name": "algorithm","type": "string","description": "Hash algorithm: md5|sha1|sha256", "required": false, "default": "sha256" }
+      ],
+      "output": {
+        "type": "object",
+        "description": "{ result: string|array|number, op: string }"
+      },
+      "tags": ["text", "regex", "transform", "compute"]
+    },
+
+    {
+      "id": "code_run",
+      "name": "Code Runner",
+      "version": "1.0.0",
+      "category": "code",
+      "description": "Executes sandboxed Python or JavaScript snippets for computations, data transforms, and off-LLM logic. Stdout captured as output.",
+      "cost_tier": "medium",
+      "executor": "subprocess",
+      "timeout_ms": 5000,
+      "parameters": [
+        { "name": "lang",    "type": "string", "description": "Language: python | javascript", "required": true, "enum": ["python","javascript"] },
+        { "name": "code",    "type": "string", "description": "Code to execute", "required": true },
+        { "name": "env",     "type": "object", "description": "Environment variables to inject", "required": false },
+        { "name": "timeout", "type": "number", "description": "Execution timeout in ms (max 5000)", "required": false, "default": 3000 }
+      ],
+      "output": {
+        "type": "object",
+        "description": "{ stdout: string, stderr: string, exit_code: number, duration_ms: number }"
+      },
+      "tags": ["code", "compute", "execute", "python", "js"]
+    },
+
+    {
+      "id": "task_planner",
+      "name": "Task Planner",
+      "version": "1.0.0",
+      "category": "meta",
+      "description": "Breaks a complex goal into ordered steps with tool assignments, dependencies, and estimated token cost per step. Returns a machine-executable plan.",
+      "cost_tier": "low",
+      "executor": "local_python",
+      "timeout_ms": 500,
+      "parameters": [
+        { "name": "goal",       "type": "string", "description": "High-level goal description", "required": true },
+        { "name": "context",    "type": "object", "description": "Known facts relevant to planning", "required": false },
+        { "name": "max_steps",  "type": "number", "description": "Maximum plan steps", "required": false, "default": 8 },
+        { "name": "constraints","type": "array",  "description": "Hard constraints (e.g. 'no network', 'read-only')", "required": false }
+      ],
+      "output": {
+        "type": "object",
+        "description": "{ steps: [{id, description, tool, inputs, depends_on}], estimated_tokens: number, risk: low|medium|high }"
+      },
+      "examples": [
+        {
+          "input": { "goal": "Summarize all .md files in /docs and store as semantic memory" },
+          "output": {
+            "steps": [
+              { "id": 1, "description": "List .md files", "tool": "file_read", "depends_on": [] },
+              { "id": 2, "description": "Read each file", "tool": "file_read", "depends_on": [1] },
+              { "id": 3, "description": "Store summaries", "tool": "memory_write", "depends_on": [2] }
+            ],
+            "estimated_tokens": 320,
+            "risk": "low"
+          }
+        }
+      ],
+      "tags": ["meta", "planning", "orchestration"]
+    },
+
+    {
+      "id": "format_output",
+      "name": "Format Output",
+      "version": "1.0.0",
+      "category": "format",
+      "description": "Converts data between formats: JSON, YAML, Markdown table, CSV, plain text. Validates against schema if provided. Zero LLM cost.",
+      "cost_tier": "free",
+      "executor": "local_python",
+      "timeout_ms": 150,
+      "parameters": [
+        { "name": "input",       "type": "object", "description": "Data to format", "required": true },
+        { "name": "to_format",   "type": "string", "description": "Target format: json|yaml|csv|md_table|plain", "required": true,
+          "enum": ["json","yaml","csv","md_table","plain"] },
+        { "name": "schema",      "type": "object", "description": "JSON Schema to validate against before formatting", "required": false },
+        { "name": "pretty",      "type": "boolean","description": "Pretty-print output", "required": false, "default": true }
+      ],
+      "output": {
+        "type": "string",
+        "description": "Formatted string representation of the input data"
+      },
+      "tags": ["format", "json", "yaml", "csv", "output"]
+    },
+
+    {
+      "id": "meta_reflect",
+      "name": "Meta Reflect",
+      "version": "1.0.0",
+      "category": "meta",
+      "description": "Analyzes recent interaction history to identify optimization opportunities: hot tools, cold memory, repeated patterns, failed tools. Feeds the self-improvement loop (R10).",
+      "cost_tier": "low",
+      "executor": "local_python",
+      "timeout_ms": 800,
+      "parameters": [
+        { "name": "window",     "type": "number", "description": "Number of recent interactions to analyze", "required": false, "default": 10 },
+        { "name": "focus",      "type": "string", "description": "Area to focus: tools|memory|latency|errors|all", "required": false, "default": "all",
+          "enum": ["tools","memory","latency","errors","all"] }
+      ],
+      "output": {
+        "type": "object",
+        "description": "{ hot_tools: [], cold_memory: [], suggested_new_tools: [], errors: [], avg_latency_ms: number, token_efficiency: number }"
+      },
+      "tags": ["meta", "reflect", "optimize", "self-improve"]
+    }
+
+  ]
+}

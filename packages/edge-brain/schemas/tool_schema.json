@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EdgeBrain Tool Schema",
+  "description": "Schema for registering and validating tools in Edge Brain",
+  "definitions": {
+    "ToolParameter": {
+      "type": "object",
+      "required": ["name", "type", "description"],
+      "properties": {
+        "name":        { "type": "string" },
+        "type":        { "type": "string", "enum": ["string","number","boolean","array","object"] },
+        "description": { "type": "string" },
+        "required":    { "type": "boolean", "default": false },
+        "default":     {},
+        "enum":        { "type": "array" }
+      }
+    },
+    "Tool": {
+      "type": "object",
+      "required": ["id","name","version","category","description","executor","parameters","output"],
+      "properties": {
+        "id":          { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$" },
+        "name":        { "type": "string" },
+        "version":     { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "category": {
+          "type": "string",
+          "enum": ["compute","memory","io","network","format","meta","time","text","code","system"]
+        },
+        "description": { "type": "string" },
+        "cost_tier": {
+          "type": "string",
+          "enum": ["free","low","medium","high"],
+          "description": "Computational cost estimate",
+          "default": "low"
+        },
+        "executor": {
+          "type": "string",
+          "enum": ["local_python","local_js","subprocess","wasm","llm_fallback"],
+          "description": "Where this tool runs — prefer non-LLM executors"
+        },
+        "timeout_ms":  { "type": "integer", "minimum": 50, "maximum": 30000, "default": 2000 },
+        "parameters":  { "type": "array", "items": { "$ref": "#/definitions/ToolParameter" } },
+        "output": {
+          "type": "object",
+          "required": ["type","description"],
+          "properties": {
+            "type":        { "type": "string" },
+            "description": { "type": "string" },
+            "schema":      { "type": "object" }
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["input","output"],
+            "properties": {
+              "input":  { "type": "object" },
+              "output": {}
+            }
+          }
+        },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["schema_version","tools"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "tools": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Tool" }
+    }
+  }
+}
